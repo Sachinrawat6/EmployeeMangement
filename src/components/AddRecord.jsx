@@ -62,7 +62,7 @@ const AddRecord = () => {
       updatedRecords = [...records];
       updatedRecords[editIndex] = updatedData;
     } else {
-      updatedRecords = [...records, updatedData];
+      updatedRecords = [updatedData,...records];
     }
 
     setRecords(updatedRecords);
