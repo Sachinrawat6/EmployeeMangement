@@ -47,8 +47,7 @@ const AddRecord = () => {
 const fetchProduct = async()=>{
     const res = await fetch("https://sachinrawat6.github.io/api/");
     const result = await res.json();
-    console.log(result)
-    // setProducts(result);
+    setProducts(result);
 }
 
 useEffect(()=>{fetchProduct()},[]);
@@ -59,7 +58,7 @@ let style_id = null;
 const matchedProduct = products.find((p) => p.style == formData.styleNumber);
 
 if (matchedProduct) {
-  style_id = matchedProduct.style_id || matchedProduct.id;
+  style_id = matchedProduct.id;
   console.log(style_id)
 } else {
   console.log("Style not found");
@@ -194,7 +193,7 @@ if (matchedProduct) {
   return (
     <>
     <div className="image  w-90 ml-auto   overflow-hidden rounded-xl   justify-center h-100 absolute right-20 top-2 ">
-        {style_id? <iframe 
+        {style_id!==null? <iframe 
           className="w-90 h-130 scale-[1.2] -mt-34"
           src={`https://www.myntra.com/dresses/qurvii/qurvii-pink-georgette-a-line-midi-dress/${style_id}/buy`}></iframe>:""} 
         
