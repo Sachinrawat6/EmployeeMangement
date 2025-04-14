@@ -9,6 +9,24 @@ const AddRecord = () => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [editIndex, setEditIndex] = useState(null);
+  const [products,setProducts] = useState([]);
+
+  
+
+  const getCurrentTimestamp = () => {
+    return new Date().toISOString().slice(0, 19).replace("T", " ");
+  };
+
+ 
+  const [formData, setFormData] = useState({
+    date: "",
+    tailorName: "",
+    workCategory: "",
+    styleNumber: "",
+    qty: "1",
+    timestamp: getCurrentTimestamp(),
+  });
+
 
   useEffect(() => {
     const storedTailors = localStorage.getItem("workers");
@@ -22,18 +40,33 @@ const AddRecord = () => {
     }
   }, []);
 
-  const getCurrentTimestamp = () => {
-    return new Date().toISOString().slice(0, 19).replace("T", " ");
-  };
 
-  const [formData, setFormData] = useState({
-    date: "",
-    tailorName: "",
-    workCategory: "",
-    styleNumber: "",
-    qty: "1",
-    timestamp: getCurrentTimestamp(),
-  });
+
+// fetching products 
+
+const fetchProduct = async()=>{
+    const res = await fetch("https://sachinrawat6.github.io/api/");
+    const result = await res.json();
+    console.log(result)
+    // setProducts(result);
+}
+
+useEffect(()=>{fetchProduct()},[]);
+
+
+// finding style id based style number 
+let style_id = null;
+const matchedProduct = products.find((p) => p.style == formData.styleNumber);
+
+if (matchedProduct) {
+  style_id = matchedProduct.style_id || matchedProduct.id;
+  console.log(style_id)
+} else {
+  console.log("Style not found");
+}
+
+
+
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -62,7 +95,7 @@ const AddRecord = () => {
       updatedRecords = [...records];
       updatedRecords[editIndex] = updatedData;
     } else {
-      updatedRecords = [updatedData,...records];
+      updatedRecords = [updatedData, ...records];
     }
 
     setRecords(updatedRecords);
@@ -110,7 +143,9 @@ const AddRecord = () => {
   };
 
   const handleSelectAll = (e) => {
-    setSelectedRecords(e.target.checked ? filteredRecords.map((_, i) => i) : []);
+    setSelectedRecords(
+      e.target.checked ? filteredRecords.map((_, i) => i) : []
+    );
   };
 
   const exportToCSV = () => {
@@ -121,7 +156,14 @@ const AddRecord = () => {
     }
 
     const csvRows = [
-      ["Date", "Tailor Name", "Work Category", "Style Number", "Qty", "Timestamp"],
+      [
+        "Date",
+        "Tailor Name",
+        "Work Category",
+        "Style Number",
+        "Qty",
+        "Timestamp",
+      ],
       ...selectedData.map((row) => [
         row.date,
         row.tailorName,
@@ -133,7 +175,8 @@ const AddRecord = () => {
     ];
 
     const csvContent =
-      "data:text/csv;charset=utf-8," + csvRows.map((e) => e.join(",")).join("\n");
+      "data:text/csv;charset=utf-8," +
+      csvRows.map((e) => e.join(",")).join("\n");
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
@@ -149,7 +192,17 @@ const AddRecord = () => {
   });
 
   return (
+    <>
+    <div className="image  w-90 ml-auto   overflow-hidden rounded-xl   justify-center h-100 absolute right-20 top-2 ">
+        {style_id? <iframe 
+          className="w-90 h-130 scale-[1.2] -mt-34"
+          src={`https://www.myntra.com/dresses/qurvii/qurvii-pink-georgette-a-line-midi-dress/${style_id}/buy`}></iframe>:""} 
+        
+        
+        </div>
     <div className="mt-4 container mx-auto py-4 px-2">
+    
+
       <form onSubmit={handleSubmit}>
         <div className="w-3xl flex justify-evenly gap-10 mx-auto">
           <input
@@ -185,6 +238,8 @@ const AddRecord = () => {
             className="border border-gray-200 rounded w-full px-4 py-2"
             disabled
           />
+
+
         </div>
 
         <h1 className="mt-10 font-bold w-3xl mx-auto">Product Details</h1>
@@ -213,7 +268,11 @@ const AddRecord = () => {
             }`}
             disabled={loading}
           >
-            {editIndex !== null ? "Update" : loading ? "Submitting..." : "Submit"}
+            {editIndex !== null
+              ? "Update"
+              : loading
+              ? "Submitting..."
+              : "Submit"}
           </button>
           {editIndex !== null && (
             <button
@@ -239,7 +298,7 @@ const AddRecord = () => {
 
       <h2 className="mt-6 font-bold text-lg">Stored Records</h2>
 
-      <div className="flex gap-4 my-4 items-center justify-between">
+      <div className="flex gap-4 my-4 items-center">
         <div>
           <input
             type="date"
@@ -306,8 +365,12 @@ const AddRecord = () => {
               </td>
               <td className="border border-gray-200 p-2">{index + 1}</td>
               <td className="border border-gray-200 p-2">{record.date}</td>
-              <td className="border border-gray-200 p-2">{record.tailorName}</td>
-              <td className="border border-gray-200 p-2">{record.styleNumber}</td>
+              <td className="border border-gray-200 p-2">
+                {record.tailorName}
+              </td>
+              <td className="border border-gray-200 p-2">
+                {record.styleNumber}
+              </td>
               <td className="border border-gray-200 p-2">{record.qty}</td>
               <td className="border border-gray-200 p-2">
                 <button
@@ -328,6 +391,7 @@ const AddRecord = () => {
         </tbody>
       </table>
     </div>
+  </>
   );
 };
 
